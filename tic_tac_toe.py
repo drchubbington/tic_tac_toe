@@ -73,24 +73,31 @@ def postorder(root):
             postorder(child)
         print(root.data)
 
-def minimax(root, alpha, beta, maximizing_player):
-    if assess_board(root.data):
+def minimax(root, position, alpha, beta, maximizing_player):
+    if assess_board(root.position):
         #game is over, return static value
-        return 0
+        return root.data
 
     if maximizing_player:
         max_eval=-9999
         for child in root.children:
-            maxEval = max(max_eval, minimax(child, alpha, beta, False))
-
+            max_eval = max(max_eval, minimax(child, alpha, beta, False))
+            alpha = max(alpha, eval)
+            if beta<=alpha:
+                break
+        return max_eval
     else:
-        pass
-
+        min_eval=9999
+        for child in root.children:
+            min_eval = min(min_eval, minimax(child, alpha, beta, True))
+            beta = min(beta, eval)
+            if beta<=alpha:
+                break
+        return min_eval
 
 #ai is oa
 def ai_move():
     pass
-
 
 
 while not winner:
@@ -99,3 +106,5 @@ while not winner:
     end_game()
     ai_move()
     end_game()
+
+
