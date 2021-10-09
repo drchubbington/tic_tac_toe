@@ -1,26 +1,28 @@
 import random
+from typing import Counter
 board = [
     ['-', '-', '-',],
     ['-', '-', '-',],
     ['-', '-', '-']
 ]
-
+global stored_ai_move
+stored_ai_move = None
 winner = None
 
-#player is x
-def player_move():
-    print_board()
+#player is 'x'
+def player_move(board):
     row = int(input("Enter a row (1-3): "))-1
     col = int(input("Enter a column (1-3): "))-1
     if board[row][col] == "-":
-         board[row][col] = "x"
+        board[row][col] = "x"
     else:
         print("Someone has already gone there!")
         player_move()
 
-def print_board():
+def print_board(board):
     for j in range(3):
         print(board[j])
+    print()
 
 def assess_board(board):
     global winner
@@ -44,7 +46,59 @@ def assess_board(board):
             return "p1"
         elif board[2][0]==board[1][1] and board[1][1]==board[0][2] and board[2][0]=="o":
             return "p2"
+    if not find_empty_spaces(board):
+        return "tie"
     return None
+
+def find_empty_spaces(board):
+    spaces = []
+    for row in range(len(board)):
+        for col in range(len(board[row])):
+            if board[row][col] == "-":
+                spaces.append([row, col])
+    return spaces
+
+def add_move(board, move, maximizing_player):
+    board[move[0]][move[1]] = "o" if maximizing_player else "x"
+    return board
+
+def minimax(board, alpha, beta, maximizing_player, is_starter):
+    state=assess_board(board)
+    if state == "p1":
+        return -1
+    elif state == "p2":
+        return 1
+    elif state == "tie":
+        return 0
+    
+    global stored_ai_move
+    if maximizing_player:
+        max_eval=-2
+        for move in find_empty_spaces(board):
+            eval = minimax(add_move([board[0][:],board[1][:],board[2][:]], move, True), alpha, beta, False, False)
+            if is_starter and eval>max_eval:
+                stored_ai_move = move
+            max_eval=max(max_eval, eval)
+            alpha = max(alpha, eval)
+            if beta<=alpha:
+                break
+        return max_eval
+    else:
+        min_eval=2
+        for move in find_empty_spaces(board):
+            eval = minimax(add_move([board[0][:],board[1][:],board[2][:]], move, False), alpha, beta, True, False)
+            min_eval = min(min_eval, eval)
+            beta = min(beta, eval)
+            if beta<=alpha:
+                break
+        return min_eval
+
+#ai is 'o'
+def ai_move(board):
+    global stored_ai_move
+    minimax(board, -2, 2, True, True)
+    move = stored_ai_move
+    board[move[0]][move[1]] = "o"
 
 def end_game():
     global board
@@ -54,57 +108,16 @@ def end_game():
     elif assess_board(board) == "p2":
         print("AI wins!")
         quit()
-    
+    elif assess_board(board) == "tie":
+        print("It's a tie!")
+        quit()
 
-class Node():
-    def __init__(self, data):
-        self.data = data
-        self.children = []
-
-    def add_child(self, data):
-        self.children.append(Node(data))
-
-    def get_child(self, ind):
-        return self.children[ind]
-
-def postorder(root):
-    if root:
-        for child in root.children:
-            postorder(child)
-        print(root.data)
-
-def minimax(root, position, alpha, beta, maximizing_player):
-    if assess_board(root.position):
-        #game is over, return static value
-        return root.data
-
-    if maximizing_player:
-        max_eval=-9999
-        for child in root.children:
-            max_eval = max(max_eval, minimax(child, alpha, beta, False))
-            alpha = max(alpha, eval)
-            if beta<=alpha:
-                break
-        return max_eval
-    else:
-        min_eval=9999
-        for child in root.children:
-            min_eval = min(min_eval, minimax(child, alpha, beta, True))
-            beta = min(beta, eval)
-            if beta<=alpha:
-                break
-        return min_eval
-
-#ai is oa
-def ai_move():
-    pass
-
-
-while not winner:
-    player_move()
-    print_board()
-    end_game()
-    ai_move()
+print_board(board)
+while True:
+    ai_move(board)
+    print_board(board)
     end_game()
 
-
+    player_move(board)
+    print_board(board)
+    end_game()
