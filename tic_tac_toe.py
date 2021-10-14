@@ -1,5 +1,4 @@
 import random
-from typing import Counter
 board = [
     ['-', '-', '-',],
     ['-', '-', '-',],
@@ -111,13 +110,23 @@ def end_game():
     elif assess_board(board) == "tie":
         print("It's a tie!")
         quit()
-
+answer = input("Would you like to go first?").lower()
 print_board(board)
-while True:
-    ai_move(board)
-    print_board(board)
-    end_game()
+if answer=="y" or answer=="yes":
+    while True:
+        player_move(board)
+        print_board(board)
+        end_game()
 
-    player_move(board)
-    print_board(board)
-    end_game()
+        ai_move(board)
+        print_board(board)
+        end_game()
+else:
+    while True:
+        ai_move(board)
+        print_board(board)
+        end_game()
+
+        player_move(board)
+        print_board(board)
+        end_game()
